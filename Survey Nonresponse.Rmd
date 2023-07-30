@@ -1,0 +1,254 @@
+---
+output:
+  pdf_document:
+    toc: yes
+  html_document:
+    toc: no
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+ p_needed <-
+  c("viridis", "stargazer", "MASS", "optimx", "foreign", "dplyr", "readxl", "stringr", "ggplot2", "splines", "janitor", "betareg", "here")
+packages <- rownames(installed.packages())
+
+p_to_install <- p_needed[!(p_needed %in% packages)]
+
+if (length(p_to_install) > 0) {
+  install.packages(p_to_install)
+}
+
+sapply(p_needed, require, character.only = TRUE)
+
+# This is an option for stargazer tables
+# It automatically adapts the output to html or latex,
+# depending on whether we want a html or pdf file
+stargazer_opt <- ifelse(knitr::is_latex_output(), "latex", "html")
+```
+
+
+```{r}
+#Importing the Pew data set
+topline <- read_excel(here("raw-data","topline.xlsx"))
+#Now I'm creating the variables I'll need for later analysis.
+topline$diff <- topline$pro_LGBT-topline$anti_LBGT
+topline$abs_diff <- abs(topline$pro_LGBT-topline$anti_LBGT)
+topline$sqr_diff <- (topline$pro_LGBT-topline$anti_LBGT)^2
+#Plus cleaning it up a bit. NAs were present in the non-1 spaces of the dummy variables. 
+topline = subset(topline, select = -c(...6))
+topline[is.na(topline)] <- 0
+
+#Another variable. 
+topline <- topline %>%
+  dplyr::mutate(anti = ifelse(anti_LBGT >= pro_LGBT, 1, 0))
+
+
+
+
+
+```
+```{r}
+#And now we need to import the World Values Survey Data
+wave6 <- read_excel(here("raw-data", "wave6.xlsx"))
+#Everything that follows is clearing it up
+wave6 <- t(wave6) #Transpose
+wave6 <- cbind(rownames(wave6), data.frame(wave6, row.names=NULL)) #Setting row names
+wave6 <- wave6 %>% row_to_names(row_number = 1) #Setting column names
+wave6 <- clean_names(wave6) #zactly what you think
+wave6 <- wave6[-c(1),] #Eliminating a column
+wave6 <- rename(wave6, "country" = "x0") 
+wave6[,2:18] <- sapply(wave6[,2:18],as.numeric) #They're chars by default
+
+#And now it's time to create our variables
+wave6$base_refused <- round(wave6$don_t_know + wave6$no_answer)
+
+wave6$diff <- (wave6$always_justifiable + wave6$x9 + wave6$x8)-(wave6$never_justifiable+wave6$x2+wave6$x3)
+wave6$abs_diff <- abs((wave6$always_justifiable + wave6$x9 + wave6$x8)-(wave6$never_justifiable+wave6$x2+wave6$x3))
+```
+
+```{r}
+#Beta regression time!
+#We'll start with Pew. First, putting it into a format that beta regression can use (between, but not including 0 and 1 in the DV)
+topline$perc_refused <- topline$refused/100
+topline$perc_abs_diff <- topline$abs_diff/100
+topline_no_zero <- topline %>%
+  filter(perc_refused >0)
+#Now I'll set up the independent variable
+topline_no_zero$perc_answered <- 100 - topline_no_zero$refused
+topline_no_zero$rel_abs_diff <- abs((topline_no_zero$pro_LGBT- topline_no_zero$anti_LBGT)/topline_no_zero$perc_answered)
+#And run the two regressions
+beta_pew <- betareg(perc_refused ~ rel_abs_diff + in_person, data = topline_no_zero)
+
+beta_pew_small <- betareg(perc_refused ~ rel_abs_diff, data = topline_no_zero)
+#Now for WVS data
+#First, putting it into a format that beta regression can use (between, but not including 0 and 1 in the DV)
+wave6$base_refused2 <- wave6$don_t_know + wave6$no_answer
+wave6$perc_refused <- wave6$base_refused2/100
+wave6$perc_abs_diff <- wave6$abs_diff/100
+wave6_no_zero <- wave6 %>%
+  filter(perc_refused >0)
+
+#And again creating the independent variable
+wave6_no_zero$perc_answered <- 100 - wave6_no_zero$base_refused
+wave6_no_zero$pro_LGBT <- wave6_no_zero$always_justifiable + wave6_no_zero$x9+wave6_no_zero$x8
+wave6_no_zero$anti_LGBT <- wave6_no_zero$never_justifiable + wave6_no_zero$x2+wave6_no_zero$x3
+
+wave6_no_zero$rel_abs_diff <- abs((wave6_no_zero$pro_LGBT/wave6_no_zero$perc_answered)- (wave6_no_zero$anti_LGBT/wave6_no_zero$perc_answered))
+
+#And running the regression
+beta_wvs <- betareg(perc_refused ~ rel_abs_diff, data = wave6_no_zero)
+
+
+
+
+```
+
+```{r}
+#Now I'll create plots of this data. 
+#First up, with Pew
+pew_plot <- ggplot(data = topline_no_zero, aes(x=rel_abs_diff, y = perc_refused))+
+  geom_point()+
+  geom_smooth(aes(y=predict(beta_pew, topline_no_zero, color = in_person)))+
+  xlab("Absolute Difference (Pro/Anti-LGBT)")+
+  ylab("Rate of Item Non-Response")+ 
+  ggtitle(label = "Figure 1- Expected Non-Response Rate", subtitle = "Using Data from Pew Surveys")+
+  labs(caption = "Using data from Model 2")
+pew_plot
+ggsave("basic PEW plot.jpeg")
+#Now I'll do the WVS plot
+wvs_plot <- ggplot(data = wave6_no_zero, aes(x=rel_abs_diff, y = perc_refused))+
+  geom_point()+
+  geom_line(aes(y=predict(beta_wvs)),col="blue", size=1.3)+
+  xlab("Absolute Difference (Pro/Anti-LGBT)")+
+  ylab("Rate of Item Non-Response")+ 
+  ggtitle(label = "Figure 2- Expected Non-Response Rate", subtitle = "Using Data from the World Values Survey")
+wvs_plot
+ggsave("basic WVS plot.jpeg")
+
+```
+
+
+```{r, results='asis'}
+#Now the first stargazer table
+stargazer(beta_pew_small, beta_pew, type="html", title=
+            "Beta Binomial Regression Model of Item Non-Response- Pew Data",
+          out = "table.tex",
+          column.sep.width = "3pt",
+          no.space = TRUE,
+          font.size = "small",
+          covariate.labels = c("Absolute Difference", "In-Person Interview"),
+          dep.var.labels = c("Non-Response"),
+          header = FALSE)
+
+
+#Now the second stargazer table
+stargazer(beta_wvs, type=stargazer_opt, title=
+            "Beta Regression Model of Item Non-Response- World Value Survey Data",
+          out = "table.tex",
+          column.sep.width = "3pt",
+          no.space = TRUE,
+          font.size = "small",
+          covariate.labels = c("Absolute Difference"),
+          dep.var.labels = c("Non-Response"),
+          header = FALSE)
+
+
+```
+
+```{r}
+#First residual check
+#I'm getting rid of the top 10% of the independent variable for mathematical reasons
+wave6_no_zero2 <- wave6_no_zero %>%
+  filter(wave6_no_zero$abs_diff <= 90)
+topline_no_zero2 <- topline_no_zero %>%
+  filter(topline_no_zero$abs_diff <= 90)
+
+#Pew Data Regressed again
+beta_pew_r1 <- betareg(perc_refused ~ rel_abs_diff + in_person, data = topline_no_zero2)
+beta_pew_small_r1 <- betareg(perc_refused ~ rel_abs_diff, data = topline_no_zero2)
+
+#WVS Data Analysis
+
+
+beta_wvs_r1 <- betareg(perc_refused ~ rel_abs_diff, data = wave6_no_zero2)
+
+stargazer(beta_pew_small_r1, beta_pew_r1, beta_wvs_r1, type="html", title=
+            "Beta Regression Models of Item Non-Response",
+          out = "table.tex",
+          column.sep.width = "3pt",
+          notes = "With all Absolute Differences Over 90 Percent Removed",
+          no.space = TRUE,
+          font.size = "small",
+          covariate.labels = c("Absolute Difference", "In-Person Interview"),
+          dep.var.labels = c("Non-Response (Pew)", "Non-Response (WVS)"),
+          header = FALSE)
+```
+
+```{r}
+#Second robustness check- Outlier removal
+#Pew to start
+beta_pew_r2 <- betareg(perc_refused ~ rel_abs_diff + in_person, data = beta_pew$model[!cooks.distance(beta_pew)> (4/length(topline_no_zero$country)),])
+beta_pew_small_r2 <- betareg(perc_refused ~ rel_abs_diff, data = beta_pew_small$model[!cooks.distance(beta_pew_small)> (4/length(topline_no_zero$country)),])
+
+summary(beta_pew_small_r2)
+#Then WVS
+beta_wvs_r2 <- betareg(perc_refused ~ rel_abs_diff, data = beta_wvs$model[!cooks.distance(beta_wvs)> (4/length(wave6_no_zero$country)),])
+summary(beta_wvs_r2)
+
+
+
+stargazer(beta_pew_small_r2, beta_pew_r2, beta_wvs_r2, type="html", title=
+            "Table 4- Beta Regression Models of Item Non-Response",
+          out = "table.tex",
+          column.sep.width = "3pt",
+          notes = "With Outliers Removed",
+          no.space = TRUE,
+          font.size = "small",
+          covariate.labels = c("Absolute Difference", "In-Person Interview"),
+          dep.var.labels = c("Non-Response (Pew)", "Non-Response (WVS)"),
+          header = FALSE)
+```
+
+```{r}
+#This is the third robustness check, a placebo test
+#And now we need to import the World Values Survey Data
+newspaper <- read_excel(here("raw-data", "newspaper.xlsx"))
+#Everything that follows is clearing it up
+newspaper <- t(newspaper) #Transpose
+newspaper <- cbind(rownames(newspaper), data.frame(newspaper, row.names=NULL)) #Setting row names
+newspaper <- newspaper %>% row_to_names(row_number = 1) #Setting column names
+newspaper <- clean_names(newspaper) #zactly what you think
+newspaper <- rename(newspaper, "country" = "x0") 
+newspaper[,2:10] <- sapply(newspaper[,2:10],as.numeric) #They're chars by default
+
+#And now it's time to create our variables
+newspaper$perc_refused <- (newspaper$don_t_know + newspaper$no_answer)/100
+newspaper$diff <- (newspaper$weekly + newspaper$daily)-(newspaper$less_than_monthly+newspaper$never)
+newspaper$abs_diff <- abs(newspaper$diff)
+newspaper$perc_diff <- newspaper$abs_diff/(100-newspaper$perc_refused)
+newspaper <- newspaper %>%
+  filter(perc_refused > 0)
+
+#Now we can run a regression
+beta_newspaper <- betareg(perc_refused ~ perc_diff, data = newspaper) 
+summary(beta_newspaper)
+
+
+stargazer(beta_newspaper, type="html", title=
+            "Beta Regression Models of Item Non-Response- Newspaper Consumption",
+          out = "table.tex",
+          column.sep.width = "3pt",
+          no.space = TRUE,
+          font.size = "small",
+          covariate.labels = c("Absolute Difference"),
+          dep.var.labels = c("Non-Response"),
+          header = FALSE)
+```
+
+
+
+
+
+
+
+
