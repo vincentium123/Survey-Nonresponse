@@ -54,3 +54,45 @@ As can be seen here, there's a clear drop non-response rate as public opinion be
 
 ![Results from the second model](https://github.com/vincentium123/Survey-Nonresponse/blob/main/basic%20PEW%20plot.jpeg)
 
+This upholds my hypothesis, as does the fact that data from the World Value Survey showed the same effect. However, I wanted to be sure. To start, I ran a few checks, first removing all data points from countries where people were either strongly for or against homosexuality. After that, I removed all outliers- observations that had unusually high nonresponse rates- using [Cook's Distance](https://www.mathworks.com/help/stats/cooks-distance.html). 
+
+Both of these tests showed the same results. 
+
+```
+topline_no_zero2 <- topline_no_zero %>%
+  filter(topline_no_zero$abs_diff <= 90)
+
+#Pew Data Regressed again
+beta_pew_r1 <- betareg(perc_refused ~ rel_abs_diff + in_person, data = topline_no_zero2)
+beta_pew_small_r1 <- betareg(perc_refused ~ rel_abs_diff, data = topline_no_zero2)
+
+beta_pew_r2 <- betareg(perc_refused ~ rel_abs_diff + in_person, data = beta_pew$model[!cooks.distance(beta_pew)> (4/length(topline_no_zero$country)),])
+beta_pew_small_r2 <- betareg(perc_refused ~ rel_abs_diff, data = beta_pew_small$model[!cooks.distance(beta_pew_small)> (4/length(topline_no_zero$country)),])
+```
+
+Following that, I performed one final test. Item nonresponse is partially related to item sensitivity. Therefore, an item that has highly polarized answers (lots of people answering yes and no) but is not socially sensitive should see no significant connection between non-response rates and polarization. For this, I selected how often survey respondent said they read the newspaper. 
+
+```
+#This is the third robustness check, a placebo test
+#And now we need to import the World Values Survey Data
+newspaper <- read_excel(here("raw-data", "newspaper.xlsx"))
+#Everything that follows is clearing it up
+newspaper <- t(newspaper) #Transpose
+newspaper <- cbind(rownames(newspaper), data.frame(newspaper, row.names=NULL)) #Setting row names
+newspaper <- newspaper %>% row_to_names(row_number = 1) #Setting column names
+newspaper <- clean_names(newspaper) #zactly what you think
+newspaper <- rename(newspaper, "country" = "x0") 
+newspaper[,2:10] <- sapply(newspaper[,2:10],as.numeric) #They're chars by default
+
+#And now it's time to create our variables
+newspaper$perc_refused <- (newspaper$don_t_know + newspaper$no_answer)/100
+newspaper$diff <- (newspaper$weekly + newspaper$daily)-(newspaper$less_than_monthly+newspaper$never)
+newspaper$abs_diff <- abs(newspaper$diff)
+newspaper$perc_diff <- newspaper$abs_diff/(100-newspaper$perc_refused)
+newspaper <- newspaper %>%
+  filter(perc_refused > 0)
+
+#Now we can run a regression
+beta_newspaper <- betareg(perc_refused ~ perc_diff, data = newspaper) 
+```
+We get exactly the expected results! There's no statistically significant relation. 
