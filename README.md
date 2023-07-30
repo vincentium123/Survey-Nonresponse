@@ -14,3 +14,6 @@ Scenarios like this occur somewhat often in real-life- most likely everyone can 
 
 As a controversial subject, I chose homosexuality. Homosexuality works well here because its social acceptability varies widely across countries. In some (Sweden, Canada, etc.) supporting gay rights is the default, and those who don't are viewed poorly. In other countries (Nigeria, Egypt, etc.) supporting gay rights is an extreme minority position. Most countries lie in the middle. According to my theory then, countries where acceptance of homosexuality has a default view (either for or against) should have a smaller non-response rate than in countries where its a controversial subject. 
 
+```
+
+```
