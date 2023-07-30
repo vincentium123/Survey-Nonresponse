@@ -52,5 +52,5 @@ beta_pew_small <- betareg(perc_refused ~ rel_abs_diff, data = topline_no_zero)
 ```
 As can be seen here, there's a clear drop non-response rate as public opinion becomes more absolute on LGBT rights. Altogether, we'd expect an approximately 15% nonresponse rate in an evenly divided country, an 8% one in a country that's split 75/25, and only a 5% one in a country where almost the entire population holds one view. 
 
-![Results from the second model]([http://url/to/img.png](https://github.com/vincentium123/Survey-Nonresponse/blob/main/basic%20PEW%20plot.jpeg)https://github.com/vincentium123/Survey-Nonresponse/blob/main/basic%20PEW%20plot.jpeg)
+![Results from the second model](https://github.com/vincentium123/Survey-Nonresponse/blob/main/basic%20PEW%20plot.jpeg)
 
