@@ -1,6 +1,6 @@
 # Survey Nonresponse
 
-This project analyzes survey data using R and beta regression to provide evidence for a new factor behind survey non-response: uncertainty about what the socially acceptable answer is. 
+This project analyzes survey data using R and beta regression to provide evidence for a new factor behind survey non-response: uncertainty about what the socially acceptable answer is. It's adapted from a paper I wrote for my Data & Measurement class at the University of Mannheim. I've included this paper, along with replication code, in this repository. 
 
 Survey design is an extremely technical field, despite how simple it can be at the surface. Researchers have spent nearly a century improving how questions are written, the scales used, and how the surveys are presented to gather better data. Examples of this are numerous, but one of the most important is called social desirability bias. Simply put, people are prone to giving answers that they feel will not offend other people or lead to them being judged. If a person if being interviewed by Coca-Cola for example, they might be reluctant to say they prefer Pepsi. This effect is magnified when the questions become even more sensitive, extending to things like drug use, political views, and sexual orientation. 
 
