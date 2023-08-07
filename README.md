@@ -67,6 +67,8 @@ beta_pew_r2 <- betareg(perc_refused ~ rel_abs_diff + in_person, data = beta_pew$
 beta_pew_small_r2 <- betareg(perc_refused ~ rel_abs_diff, data = beta_pew_small$model[!cooks.distance(beta_pew_small)> (4/length(topline_no_zero$country)),])
 ```
 
-Following that, I performed one final test. Item nonresponse is partially related to item sensitivity. Therefore, an item that has highly polarized answers (lots of people answering yes and no) but is not socially sensitive should see no significant connection between non-response rates and polarization. For this, I selected how often survey respondent said they read the newspaper. 
+Following that, I performed a placebo test, conducting the same analysis on a case where I do not expect significant results. Item nonresponse is partially related to item sensitivity. Therefore, an item that has highly polarized answers (lots of people answering yes and no) but is not socially sensitive should see no significant connection between non-response rates and polarization. For this, I selected how often survey respondent said they read the newspaper. 
+
+The regression did not return significant results. The graph below shows the difference from the earlier, controversial, question clearly. Firstly, non-response rates are much lower- the highest is only 5%, versus around 30% for the question about homosexuality. Secondly, the trend line is essentially flat. Even if it were significant, the real-world effect would be minimal, only a difference of a percent or two. From this, we can see that it is indeed social desirability affecting the non-response rates. 
 
 <h3><img align="center" height="500" src="https://github.com/vincentium123/Survey-Nonresponse/blob/main/newspaper%20plot.jpeg"></h3>
