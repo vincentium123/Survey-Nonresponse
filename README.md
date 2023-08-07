@@ -69,27 +69,7 @@ beta_pew_small_r2 <- betareg(perc_refused ~ rel_abs_diff, data = beta_pew_small$
 
 Following that, I performed one final test. Item nonresponse is partially related to item sensitivity. Therefore, an item that has highly polarized answers (lots of people answering yes and no) but is not socially sensitive should see no significant connection between non-response rates and polarization. For this, I selected how often survey respondent said they read the newspaper. 
 
-```
-#This is the third robustness check, a placebo test
-#And now we need to import the World Values Survey Data
-newspaper <- read_excel(here("raw-data", "newspaper.xlsx"))
-#Everything that follows is clearing it up
-newspaper <- t(newspaper) #Transpose
-newspaper <- cbind(rownames(newspaper), data.frame(newspaper, row.names=NULL)) #Setting row names
-newspaper <- newspaper %>% row_to_names(row_number = 1) #Setting column names
-newspaper <- clean_names(newspaper) #zactly what you think
-newspaper <- rename(newspaper, "country" = "x0") 
-newspaper[,2:10] <- sapply(newspaper[,2:10],as.numeric) #They're chars by default
+![Results from the second model](https://github.com/vincentium123/Survey-Nonresponse/blob/main/newspaper%20plot%20.jpeg)
 
-#And now it's time to create our variables
-newspaper$perc_refused <- (newspaper$don_t_know + newspaper$no_answer)/100
-newspaper$diff <- (newspaper$weekly + newspaper$daily)-(newspaper$less_than_monthly+newspaper$never)
-newspaper$abs_diff <- abs(newspaper$diff)
-newspaper$perc_diff <- newspaper$abs_diff/(100-newspaper$perc_refused)
-newspaper <- newspaper %>%
-  filter(perc_refused > 0)
 
-#Now we can run a regression
-beta_newspaper <- betareg(perc_refused ~ perc_diff, data = newspaper) 
-```
 After running this regression, we get exactly the expected results. 
