@@ -1,4 +1,4 @@
-# Survey Nonresponse
+# CROSS-NATIONAL CULTURAL EFFECTS ON SURVEY NON-RESPONSE RATES
 
 This project analyzes survey data using R and beta regression to provide evidence for a new factor behind survey non-response: uncertainty about what the socially acceptable answer is. It's adapted from a paper I wrote for my Data & Measurement class at the University of Mannheim. I've included this paper, along with replication code, in this repository. 
 
