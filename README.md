@@ -1,7 +1,10 @@
 # CROSS-NATIONAL CULTURAL EFFECTS ON SURVEY NON-RESPONSE RATES
 
+## The Project
+
 This project analyzes survey data using R and beta regression to provide evidence for a new factor behind survey non-response rates: uncertainty about what the socially acceptable answer is. It's adapted from a paper I wrote for my Data & Measurement class at the University of Mannheim. I've included this paper, along with replication code, in this repository. 
 
+## Background
 Survey design is an extremely technical field, despite how simple it can appear at the surface. Researchers have spent nearly a century improving how questions are written, the scales used, and how the surveys are presented to gather better data. One of thechief problems is a psychological phenomenon called social desirability bias. Simply put, people are prone to giving answers that they feel will not offend other people or lead to them being judged. If a person is being interviewed by Coca-Cola for example, they might be reluctant to say they prefer Pepsi. This effect is magnified when the questions become even more sensitive, extending to things like drug use, political views, and sexual orientation. 
 
 Two key ways that social desirability bias manifests itself is by choosing the socially "correct" answer and non-response. In the former, respondents will go with whatever answer they feel is safest. Our hypothetical Coca-cola interviewee, for example, might state that they love Coke. In the latter, respondents, when given the option, might choose to answer "don't know", leave an item blank, or choose a neutral option. 
@@ -9,6 +12,8 @@ Two key ways that social desirability bias manifests itself is by choosing the s
 Both of these can be problematic for anyone answering survey data. In the former case, analysts might overestimate the popularity of the socially "correct" answer, while in the latter, they will be unable to determine if people simply didn't understand the question or just don't want to answer. These problems are well-known, and survey creators have worked out methods for minimizing their effect. 
 
 However, there is a possibility that survey creators have not dealt with: when the socially "correct" answer is unknown. Let's imagine a scenario. The leadership of a company recently made a change- say switching from fully remote to hybrid work. This move was controversial both among employees and leadership. Now, several months later, management decides to conduct a survey of employees to see what their opinions are. These surveys are anonymous, but the employees don't trust management that there will be no consequences to giving the "wrong' answer. At the same time, management itself is divided, which the employees know. From employees' perspectives, therefore, coming out in favor of either remote work or of hybrid work could lead to consequences. The safest choice is not to give an answer or to give one that's as neutral as possible. 
+
+## Implementation
 
 Scenarios like this occur somewhat often in real-life- most likely everyone can think of a time when they didn't express their true thoughts out of fear of the consequences. It hasn't, however, been statistically shown in research about survey design. That's what I'll be doing here. To do this, I'll be analyzing data collected by two surveys: the Global Attitudes Project, conducted by Pew Research, and the World Values Survey. Each one surveyed tens of thousands of people in dozens of countries, trying to conclusively pin down global attitudes about democracy, human rights, and society. 
 
