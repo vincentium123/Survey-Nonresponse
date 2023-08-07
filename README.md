@@ -2,7 +2,7 @@
 
 ## The Project
 
-This project analyzes survey data using R and beta regression to provide evidence for a new factor behind survey non-response rates: uncertainty about what the socially acceptable answer is. It's adapted from a paper I wrote for my Data & Measurement class at the University of Mannheim. I've included this paper, along with replication code, in this repository. 
+This project analyzes survey data using beta regression in R to provide evidence for a new factor behind survey non-response rates: uncertainty about what the socially acceptable answer is. It's adapted from a paper I wrote for my Data & Measurement class at the University of Mannheim. I've included this paper, along with replication code, in this repository. 
 
 ## Background
 Survey design is an extremely technical field, despite how simple it can appear at the surface. Researchers have spent nearly a century improving how questions are written, the scales used, and how the surveys are presented to gather better data. One of thechief problems is a psychological phenomenon called social desirability bias. Simply put, people are prone to giving answers that they feel will not offend other people or lead to them being judged. If a person is being interviewed by Coca-Cola for example, they might be reluctant to say they prefer Pepsi. This effect is magnified when the questions become even more sensitive, extending to things like drug use, political views, and sexual orientation. 
@@ -15,13 +15,14 @@ However, there is a possibility that survey creators have not dealt with: when t
 
 ## Implementation
 
-Scenarios like this occur somewhat often in real-life- most likely everyone can think of a time when they didn't express their true thoughts out of fear of the consequences. It hasn't, however, been statistically shown in research about survey design. That's what I'll be doing here. To do this, I'll be analyzing data collected by two surveys: the Global Attitudes Project, conducted by Pew Research, and the World Values Survey. Each one surveyed tens of thousands of people in dozens of countries, trying to conclusively pin down global attitudes about democracy, human rights, and society. 
+I'll be analyzing data collected by two surveys: the Global Attitudes Project, conducted by Pew Research, and the World Values Survey. Each one surveyed tens of thousands of people in dozens of countries, trying to conclusively pin down global attitudes about democracy, human rights, and society. 
 
-As a controversial subject, I chose homosexuality. Homosexuality works well here because its social acceptability varies widely across countries. In some (Sweden, Canada, etc.) supporting gay rights is the default, and those who don't are viewed poorly. In other countries (Nigeria, Egypt, etc.) supporting gay rights is an extreme minority position. Most countries lie in the middle. According to my theory then, countries where acceptance of homosexuality has a default view (either for or against) should have a smaller non-response rate than in countries where its a controversial subject. 
+As a controversial subject, I chose a question about whether homosexuality should be accepted by society. Homosexuality works well here because its social acceptability varies dramatically across countries. In some (Sweden, Canada, etc.) supporting gay rights is the default, and those who don't do so are viewed poorly. In other countries (Nigeria, Egypt, etc.) supporting gay rights is an extreme minority position. Most countries lie in the middle. According to my theory, countries where acceptance of homosexuality has a societally 'default' view (either for or against) should have a smaller non-response rate than in countries where its a controversial subject. 
 
 Let's get started. To save space, I'll only show code relating to the data from Pew, but I found the same results from the World Values Survey Data. Full code can be found in this repository. 
 
 To begin, I loaded the data, cleaned it, and constructed the variables. As my question dealt with the absolute difference of opinion, I created a variable that showed the absolute difference between pro- and anti-LGBT opinion. Then I cleaned up the dataset a bit, replacing NAs with 0s in the boolean columns. 
+
 ```
 #Importing the Pew data set
 topline <- read_excel(here("raw-data","topline.xlsx"))
