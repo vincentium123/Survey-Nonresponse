@@ -69,9 +69,4 @@ beta_pew_small_r2 <- betareg(perc_refused ~ rel_abs_diff, data = beta_pew_small$
 
 Following that, I performed one final test. Item nonresponse is partially related to item sensitivity. Therefore, an item that has highly polarized answers (lots of people answering yes and no) but is not socially sensitive should see no significant connection between non-response rates and polarization. For this, I selected how often survey respondent said they read the newspaper. 
 
-<h3><img align="center" height="500" src="https://github.com/vincentium123/Survey-Nonresponse/blob/main/newspaper%20plot%20.jpeg"></h3>
-
-
-
-
-After running this regression, we get exactly the expected results. 
+<h3><img align="center" height="500" src="https://github.com/vincentium123/Survey-Nonresponse/blob/main/newspaper%20plot.jpeg"></h3>
