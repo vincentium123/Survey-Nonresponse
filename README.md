@@ -92,5 +92,4 @@ newspaper <- newspaper %>%
 #Now we can run a regression
 beta_newspaper <- betareg(perc_refused ~ perc_diff, data = newspaper) 
 ```
-We get exactly the expected results! There's no statistically significant relation. 
-
+After running this regression, we get exactly the expected results. 
